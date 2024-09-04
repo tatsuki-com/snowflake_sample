@@ -1,0 +1,81 @@
+CREATE OR REPLACE PROCEDURE output_message(message VARCHAR)
+RETURNS VARCHAR NOT NULL
+LANGUAGE SQL
+AS
+BEGIN
+  RETURN message;
+END;
+
+CALL output_message('fuck');
+
+CREATE OR REPLACE PROCEDURE return_greater(number_1 INTEGER, number_2 INTEGER)
+RETURNS INTEGER NOT NULL
+LANGUAGE SQL
+AS
+BEGIN
+  IF (number_1 > number_2) THEN
+    RETURN number_1;
+  ELSE
+    RETURN number_2;
+  END IF;
+END;
+
+CALL return_greater(10,9);
+
+CREATE OR REPLACE PROCEDURE find_invoice_by_id(code VARCHAR, code2 VARCHAR)
+RETURNS TABLE (code NUMBER(38,0), namea VARCHAR)
+LANGUAGE SQL
+AS
+DECLARE
+  res RESULTSET DEFAULT (SELECT code, namea FROM NUMBERS WHERE CODE = :code);
+BEGIN
+  res := (SELECT code, namea FROM NUMBERS WHERE CODE = :code2);
+  RETURN TABLE(res);
+END;
+
+CALL find_invoice_by_id('963', '658');
+
+CREATE OR REPLACE PROCEDURE find_invoice_by_id(code VARCHAR, code2 VARCHAR)
+RETURNS TABLE (code NUMBER(38,0), namea VARCHAR)
+LANGUAGE SQL
+AS
+DECLARE
+  res RESULTSET ;
+BEGINPROC.PROCS.RESULT
+  DELETE FROM RESULT;
+  res := (SELECT code, namea FROM NUMBERS WHERE CODE = :code2);
+  RETURN TABLE(res);
+END;
+
+CALL find_invoice_by_id('963', '658');
+
+CREATE OR REPLACE PROCEDURE find_invoice_by_id(code1 VARCHAR, code2 VARCHAR)
+RETURNS TABLE (code NUMBER(38,0), namea VARCHAR)
+LANGUAGE SQL
+AS
+DECLARE
+  res RESULTSET ;
+BEGIN
+  DELETE FROM RESULT;
+  INSERT INTO RESULT(CODE, naMeA) SELECT CODE, DATEA FROM NUMBERS;
+  res := (SELECT code, namea FROM NUMBERS WHERE CODE = :code2);
+  RETURN TABLE(res);
+END;
+
+CALL find_invoice_by_id('963', '658');
+
+CREATE OR REPLACE VIEW v1 (code, NAMEA, NAMEB, codes) AS
+    SELECT num.code, num.namea, alt.nameb, num.yeara + alt.code - alt.code
+    FROM PROC.PROCS.NUMBERS num
+    INNER JOIN LINKSERVERTEST_SNOWFLAKE.ALTERS."ALTER" alt
+    on num.code = alt.code;
+
+select * from v1;
+    
+CREATE VIEW v2 (code, NAMEA, NAMEB, codes) AS
+    SELECT num.code, num.namea, alt.nameb, num.yeara + alt.code
+    FROM PROC.PROCS.NUMBERS num
+    INNER JOIN PROC.aaa.aaatable alt
+    on num.code = alt.code;
+
+select * from v2;
