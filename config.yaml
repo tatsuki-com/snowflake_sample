@@ -1,0 +1,56 @@
+# メール添付ファイル収集・集約システム 設定ファイル
+
+outlook:
+  target_addresses:
+    - "example@example.com"
+  target_folder: "受信トレイ"
+  attachment_extensions:
+    - ".xlsx"
+    - ".xlsm"
+
+paths:
+  folder_a: "./collected"
+  folder_b: "./aggregated"
+  folders_move:
+    type_1: "./completed/D"
+    type_2: "./completed/E"
+    type_3: "./completed/F"
+
+files:
+  file_list: "ファイル一覧.xlsm"
+  naming_pattern: "^.+\\.(xlsx|xlsm)$"
+  aggregation_targets:
+    type_1: "alpha.xlsx"
+    type_2: "beta.xlsx"
+    type_3: "gamma.xlsx"
+
+data_extraction:
+  datetime_sheet: "_get_datetime"
+  datetime_cell: "A1"
+  data_range:
+    column: "B"
+    start_row: 10
+    end_row: 20
+  routing_cell: "B11"
+
+file_list_sheet:
+  name: "一覧"
+  columns:
+    filename: "A"
+    original_filename: "B"
+    received_datetime: "C"
+    collected_datetime: "D"
+    duplicate_flag: "E"
+    updated_flag: "F"
+    routing_type: "G"
+    remarks: "H"
+
+logging:
+  level: "INFO"
+  file: "./logs/process.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+retry:
+  max_attempts: 3
+  wait_seconds: 5
