@@ -20,9 +20,7 @@ def scan_target_files(config: dict) -> list:
     Returns:
         list[dict]: 対象ファイルのリスト
     """
-    file_list_path = os.path.join(
-        config["paths"]["folder_a"], config["files"]["file_list"]
-    )
+    file_list_path = config["files"]["file_list_path"]
     sheet_name = config["file_list_sheet"]["name"]
     columns = config["file_list_sheet"]["columns"]
     naming_pattern = re.compile(config["files"]["naming_pattern"])

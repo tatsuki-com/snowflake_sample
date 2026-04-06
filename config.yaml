@@ -8,16 +8,8 @@ outlook:
     - ".xlsx"
     - ".xlsm"
 
-paths:
-  folder_a: "./collected"
-  folder_b: "./aggregated"
-  folders_move:
-    type_1: "./completed/D"
-    type_2: "./completed/E"
-    type_3: "./completed/F"
-
 files:
-  file_list: "ファイル一覧.xlsm"
+  file_list_path: "./ファイル一覧.xlsm"
   naming_pattern: "^.+\\.(xlsx|xlsm)$"
   aggregation_targets:
     type_1: "alpha.xlsx"
@@ -32,6 +24,9 @@ data_extraction:
     start_row: 10
     end_row: 20
   routing_cell: "B11"
+
+paths_sheet:
+  name: "設定"
 
 file_list_sheet:
   name: "一覧"

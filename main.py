@@ -7,6 +7,7 @@ from datetime import datetime
 
 from common.config_loader import load_config
 from common.logger import setup_logger
+from common.paths_loader import load_paths_from_file_list
 
 
 def run_collect(config: dict, start_datetime: datetime) -> None:
@@ -165,6 +166,7 @@ def main():
         sys.exit(1)
 
     config = load_config(args.config)
+    config["paths"] = load_paths_from_file_list(config)
 
     if args.command == "collect":
         try:

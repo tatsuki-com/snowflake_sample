@@ -10,11 +10,9 @@ from collector.list_updater import append_to_file_list, update_flags
 
 
 def _make_config(tmp_path):
-    folder_a = str(tmp_path / "collected")
-    os.makedirs(folder_a, exist_ok=True)
+    file_list_path = str(tmp_path / "filelist.xlsx")
     return {
-        "paths": {"folder_a": folder_a},
-        "files": {"file_list": "filelist.xlsx"},
+        "files": {"file_list_path": file_list_path},
         "file_list_sheet": {
             "name": "一覧",
             "columns": {
@@ -45,9 +43,8 @@ class TestAppendToFileList:
 
         append_to_file_list(file_info, config)
 
-        file_list_path = os.path.join(config["paths"]["folder_a"], config["files"]["file_list"])
         from openpyxl import load_workbook
-        wb = load_workbook(file_list_path)
+        wb = load_workbook(config["files"]["file_list_path"])
         ws = wb["一覧"]
         # 新規ワークブックの場合 max_row=1 のため、データは2行目に書き込まれる
         assert ws["A2"].value == "test.xlsx"
@@ -68,9 +65,8 @@ class TestAppendToFileList:
 
         append_to_file_list(file_info, config)
 
-        file_list_path = os.path.join(config["paths"]["folder_a"], config["files"]["file_list"])
         from openpyxl import load_workbook
-        wb = load_workbook(file_list_path)
+        wb = load_workbook(config["files"]["file_list_path"])
         ws = wb["一覧"]
         assert ws["A2"].value == "test_20260401.xlsx"
         assert ws["E2"].value == 1
@@ -83,7 +79,7 @@ class TestUpdateFlags:
         config = _make_config(tmp_path)
 
         # 事前にファイル一覧を作成
-        file_list_path = os.path.join(config["paths"]["folder_a"], config["files"]["file_list"])
+        file_list_path = config["files"]["file_list_path"]
         wb = Workbook()
         ws = wb.active
         ws.title = "一覧"
@@ -99,7 +95,7 @@ class TestUpdateFlags:
         update_flags("file2.xlsx", "type_1", config)
 
         from openpyxl import load_workbook
-        wb = load_workbook(file_list_path)
+        wb = load_workbook(config["files"]["file_list_path"])
         ws = wb["一覧"]
         assert ws["F1"].value == 0  # file1は変更されない
         assert ws["F2"].value == 1

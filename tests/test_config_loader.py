@@ -15,15 +15,13 @@ def _make_valid_config():
             "target_folder": "受信トレイ",
             "attachment_extensions": [".xlsx"],
         },
-        "paths": {
-            "folder_a": "./collected",
-            "folder_b": "./aggregated",
-            "folders_move": {"type_1": "./completed/D"},
-        },
         "files": {
-            "file_list": "ファイル一覧.xlsm",
+            "file_list_path": "./ファイル一覧.xlsm",
             "naming_pattern": "^.+\\.xlsx$",
             "aggregation_targets": {"type_1": "alpha.xlsx"},
+        },
+        "paths_sheet": {
+            "name": "設定",
         },
         "data_extraction": {
             "datetime_sheet": "_get_datetime",
@@ -62,7 +60,7 @@ class TestLoadConfig:
 
         result = load_config(str(config_file))
         assert result["outlook"]["target_folder"] == "受信トレイ"
-        assert result["paths"]["folder_a"] == "./collected"
+        assert result["files"]["file_list_path"] == "./ファイル一覧.xlsm"
 
     def test_file_not_found(self):
         with pytest.raises(FileNotFoundError):

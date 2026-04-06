@@ -9,12 +9,10 @@ from aggregator.file_scanner import scan_target_files
 
 
 def _make_config(tmp_path):
-    folder_a = str(tmp_path / "collected")
-    os.makedirs(folder_a, exist_ok=True)
+    file_list_path = str(tmp_path / "filelist.xlsx")
     return {
-        "paths": {"folder_a": folder_a},
         "files": {
-            "file_list": "filelist.xlsx",
+            "file_list_path": file_list_path,
             "naming_pattern": "^.+\\.(xlsx|xlsm)$",
         },
         "file_list_sheet": {
@@ -48,7 +46,7 @@ def _create_file_list(path, rows):
 class TestScanTargetFiles:
     def test_returns_unprocessed_files(self, tmp_path):
         config = _make_config(tmp_path)
-        file_list_path = os.path.join(config["paths"]["folder_a"], config["files"]["file_list"])
+        file_list_path = config["files"]["file_list_path"]
 
         _create_file_list(file_list_path, [
             ["report.xlsx", "report.xlsx", None, None, 0, 0, "", ""],
@@ -62,7 +60,7 @@ class TestScanTargetFiles:
 
     def test_filters_by_naming_pattern(self, tmp_path):
         config = _make_config(tmp_path)
-        file_list_path = os.path.join(config["paths"]["folder_a"], config["files"]["file_list"])
+        file_list_path = config["files"]["file_list_path"]
 
         _create_file_list(file_list_path, [
             ["report.xlsx", "report.xlsx", None, None, 0, 0, "", ""],
@@ -75,7 +73,7 @@ class TestScanTargetFiles:
 
     def test_empty_list(self, tmp_path):
         config = _make_config(tmp_path)
-        file_list_path = os.path.join(config["paths"]["folder_a"], config["files"]["file_list"])
+        file_list_path = config["files"]["file_list_path"]
 
         _create_file_list(file_list_path, [])
         targets = scan_target_files(config)

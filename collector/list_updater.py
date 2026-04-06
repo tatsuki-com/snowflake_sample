@@ -1,6 +1,5 @@
 """ファイル一覧.xlsm 追記/フラグ更新モジュール"""
 
-import os
 import logging
 
 from common.excel_utils import (
@@ -15,9 +14,7 @@ logger = logging.getLogger("email_attachment_system")
 
 def append_to_file_list(file_info: dict, config: dict) -> None:
     """ファイル一覧.xlsmに収集結果を1行追記する。"""
-    file_list_path = os.path.join(
-        config["paths"]["folder_a"], config["files"]["file_list"]
-    )
+    file_list_path = config["files"]["file_list_path"]
     sheet_name = config["file_list_sheet"]["name"]
     columns = config["file_list_sheet"]["columns"]
 
@@ -41,9 +38,7 @@ def append_to_file_list(file_info: dict, config: dict) -> None:
 
 def update_flags(filename: str, routing_type: str, config: dict) -> None:
     """ファイル一覧のF列(更新済みフラグ)=1、G列(振り分け先)を更新する。"""
-    file_list_path = os.path.join(
-        config["paths"]["folder_a"], config["files"]["file_list"]
-    )
+    file_list_path = config["files"]["file_list_path"]
     sheet_name = config["file_list_sheet"]["name"]
     columns = config["file_list_sheet"]["columns"]
 
