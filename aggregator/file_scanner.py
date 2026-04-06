@@ -35,7 +35,6 @@ def scan_target_files(config: dict) -> list:
     ws = wb[sheet_name]
 
     filename_col = col_letter_to_index(columns["filename"])
-    original_col = col_letter_to_index(columns["original_filename"])
     duplicate_col = col_letter_to_index(columns["duplicate_flag"])
     updated_col = col_letter_to_index(columns["updated_flag"])
 
@@ -57,7 +56,6 @@ def scan_target_files(config: dict) -> list:
 
         targets.append({
             "filename": filename,
-            "original_filename": row[original_col - 1].value,
             "row_number": row[0].row,
         })
 

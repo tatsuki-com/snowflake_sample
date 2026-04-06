@@ -28,7 +28,6 @@ def run_collect(config: dict, start_datetime: datetime) -> None:
 
     outlook_config = config["outlook"]
     success_count = 0
-    skip_count = 0
     error_count = 0
 
     try:
@@ -67,8 +66,7 @@ def run_collect(config: dict, start_datetime: datetime) -> None:
 
     logger.info("=" * 60)
     logger.info(
-        f"ファイル収集完了 - 成功: {success_count}, "
-        f"スキップ: {skip_count}, エラー: {error_count}"
+        f"ファイル収集完了 - 成功: {success_count}, エラー: {error_count}"
     )
 
 
