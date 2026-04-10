@@ -23,41 +23,114 @@ GRANT USAGE ON WAREHOUSE my_warehouse           TO ROLE my_role;
 -- ============================================================
 -- DML 権限：既存オブジェクト
 -- ============================================================
+
+-- テーブル
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE
-    ON ALL TABLES  IN SCHEMA my_database.my_schema TO ROLE my_role;
+    ON ALL TABLES IN SCHEMA my_database.my_schema TO ROLE my_role;
 
+-- ビュー
 GRANT SELECT
-    ON ALL VIEWS   IN SCHEMA my_database.my_schema TO ROLE my_role;
+    ON ALL VIEWS IN SCHEMA my_database.my_schema TO ROLE my_role;
 
+-- マテリアライズド・ビュー
+GRANT SELECT
+    ON ALL MATERIALIZED VIEWS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- 動的テーブル（SELECT:参照 / OPERATE:手動リフレッシュ / MONITOR:状態確認）
+GRANT SELECT, OPERATE, MONITOR
+    ON ALL DYNAMIC TABLES IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- ストリーム
 GRANT SELECT
     ON ALL STREAMS IN SCHEMA my_database.my_schema TO ROLE my_role;
 
+-- タスク
 GRANT MONITOR, OPERATE
-    ON ALL TASKS   IN SCHEMA my_database.my_schema TO ROLE my_role;
+    ON ALL TASKS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- アラート（MONITOR:状態確認 / OPERATE:一時停止・再開）
+GRANT MONITOR, OPERATE
+    ON ALL ALERTS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- ファイル・フォーマット（USAGE:クエリ・COPY で利用）
+GRANT USAGE
+    ON ALL FILE FORMATS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- パイプ（MONITOR:状態確認 / OPERATE:一時停止・再開）
+GRANT MONITOR, OPERATE
+    ON ALL PIPES IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- タグ（APPLY:オブジェクトへのタグ付け）
+GRANT APPLY
+    ON ALL TAGS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- ノートブック（USAGE:閲覧・実行）
+GRANT USAGE
+    ON ALL NOTEBOOKS IN SCHEMA my_database.my_schema TO ROLE my_role;
 
 -- ============================================================
 -- DML 権限：今後作成されるオブジェクト（FUTURE）
 -- ============================================================
+
+-- テーブル
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE
-    ON FUTURE TABLES  IN SCHEMA my_database.my_schema TO ROLE my_role;
+    ON FUTURE TABLES IN SCHEMA my_database.my_schema TO ROLE my_role;
 
+-- ビュー
 GRANT SELECT
-    ON FUTURE VIEWS   IN SCHEMA my_database.my_schema TO ROLE my_role;
+    ON FUTURE VIEWS IN SCHEMA my_database.my_schema TO ROLE my_role;
 
+-- マテリアライズド・ビュー
+GRANT SELECT
+    ON FUTURE MATERIALIZED VIEWS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- 動的テーブル
+GRANT SELECT, OPERATE, MONITOR
+    ON FUTURE DYNAMIC TABLES IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- ストリーム
 GRANT SELECT
     ON FUTURE STREAMS IN SCHEMA my_database.my_schema TO ROLE my_role;
 
+-- タスク
 GRANT MONITOR, OPERATE
-    ON FUTURE TASKS   IN SCHEMA my_database.my_schema TO ROLE my_role;
+    ON FUTURE TASKS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- アラート
+GRANT MONITOR, OPERATE
+    ON FUTURE ALERTS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- ファイル・フォーマット
+GRANT USAGE
+    ON FUTURE FILE FORMATS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- パイプ
+GRANT MONITOR, OPERATE
+    ON FUTURE PIPES IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- タグ
+GRANT APPLY
+    ON FUTURE TAGS IN SCHEMA my_database.my_schema TO ROLE my_role;
+
+-- ノートブック
+GRANT USAGE
+    ON FUTURE NOTEBOOKS IN SCHEMA my_database.my_schema TO ROLE my_role;
 
 -- ============================================================
 -- DDL 権限：スキーマ内でのオブジェクト作成
 -- ============================================================
 GRANT CREATE TABLE,
       CREATE VIEW,
+      CREATE MATERIALIZED VIEW,
+      CREATE DYNAMIC TABLE,
       CREATE STAGE,
       CREATE STREAM,
       CREATE TASK,
+      CREATE ALERT,
+      CREATE FILE FORMAT,
+      CREATE PIPE,
+      CREATE TAG,
+      CREATE NOTEBOOK,
       CREATE SEQUENCE,
       CREATE FUNCTION,
       CREATE PROCEDURE
