@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Me</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 540px;
+      width: 100%;
+    }
+    .interest-btn {
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: 20px;
+    }
+    .interest-btn.selected {
+      background-color: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 12px;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5a6fd6, #6a3d96);
+      border: none;
+    }
+    h2 { color: #4a4a8a; }
+  </style>
+</head>
+<body>
+  <div class="card p-4 p-md-5">
+    <div class="text-center mb-4">
+      <div style="font-size:48px">💜</div>
+      <h2 class="fw-bold mb-1">Match Me</h2>
+      <p class="text-muted">Find people who share your interests and chat with them</p>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Your Name</label>
+      <input type="text" id="nameInput" class="form-control form-control-lg" placeholder="Enter your name" autocomplete="off">
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">
+        Your Interests
+        <span class="text-muted fw-normal">(select at least 2)</span>
+      </label>
+      <div class="d-flex flex-wrap gap-2" id="interestGrid">
+        {% for interest in interests %}
+        <button class="btn btn-outline-secondary btn-sm interest-btn" data-interest="{{ interest }}">{{ interest }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div id="errorMsg" class="alert alert-danger d-none py-2"></div>
+
+    <button class="btn btn-primary btn-lg w-100 fw-semibold" onclick="register()">
+      Find My Matches &rarr;
+    </button>
+  </div>
+
+  <script>
+    const selectedInterests = new Set();
+
+    document.querySelectorAll('.interest-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const interest = btn.dataset.interest;
+        if (selectedInterests.has(interest)) {
+          selectedInterests.delete(interest);
+          btn.classList.remove('selected');
+        } else {
+          selectedInterests.add(interest);
+          btn.classList.add('selected');
+        }
+      });
+    });
+
+    async function register() {
+      const name = document.getElementById('nameInput').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.classList.add('d-none');
+
+      if (!name) {
+        errorMsg.textContent = 'Please enter your name.';
+        errorMsg.classList.remove('d-none');
+        return;
+      }
+      if (selectedInterests.size < 2) {
+        errorMsg.textContent = 'Please select at least 2 interests.';
+        errorMsg.classList.remove('d-none');
+        return;
+      }
+
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, interests: [...selectedInterests] })
+      });
+      const data = await res.json();
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      } else {
+        errorMsg.textContent = data.error || 'Registration failed.';
+        errorMsg.classList.remove('d-none');
+      }
+    }
+
+    document.getElementById('nameInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') register();
+    });
+  </script>
+</body>
+</html>

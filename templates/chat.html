@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Me - Chat</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { background: #f0f2f5; height: 100vh; overflow: hidden; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    /* Navbar */
+    .topbar {
+      height: 56px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+    .topbar-brand { color: white; font-weight: 700; font-size: 20px; }
+    .topbar-user { color: rgba(255,255,255,0.9); font-size: 14px; }
+
+    /* Layout */
+    .main-layout { display: flex; height: calc(100vh - 56px); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      min-width: 300px;
+      background: white;
+      border-right: 1px solid #e5e5e5;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-profile {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fafafa;
+    }
+    .sidebar-matches-header {
+      padding: 10px 16px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+    }
+    .sidebar-list { flex: 1; overflow-y: auto; }
+
+    /* Match card */
+    .match-card {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .match-card:hover { background: #f8f0ff; }
+    .match-card.active { background: #efe8ff; border-left: 3px solid #667eea; }
+    .match-name { font-weight: 600; font-size: 15px; }
+    .match-score { font-size: 11px; background: #667eea; color: white; padding: 2px 7px; border-radius: 10px; }
+    .interest-tag {
+      font-size: 11px;
+      background: #f0eeff;
+      color: #667eea;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    /* Online dot */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot-online { background: #28a745; }
+    .dot-offline { background: #ccc; }
+
+    /* Chat area */
+    .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .chat-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e5e5e5;
+      background: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .chat-header-name { font-weight: 700; font-size: 16px; }
+    .chat-header-status { font-size: 13px; color: #888; }
+
+    .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
+
+    .msg-row { display: flex; }
+    .msg-row.mine { justify-content: flex-end; }
+    .msg-row.theirs { justify-content: flex-start; }
+
+    .bubble {
+      max-width: 65%;
+      padding: 9px 14px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .bubble.mine {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .bubble.theirs {
+      background: white;
+      color: #222;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .bubble-sender { font-size: 11px; font-weight: 600; opacity: 0.65; margin-bottom: 2px; }
+    .bubble-time { font-size: 10px; opacity: 0.55; margin-top: 3px; text-align: right; }
+
+    .message-input-area {
+      padding: 12px 16px;
+      background: white;
+      border-top: 1px solid #e5e5e5;
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .message-input-area input {
+      flex: 1;
+      border-radius: 22px;
+      border: 1.5px solid #ddd;
+      padding: 9px 16px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .message-input-area input:focus { border-color: #667eea; }
+    .send-btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 22px;
+      padding: 9px 22px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.15s;
+    }
+    .send-btn:hover { opacity: 0.88; }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #bbb;
+      text-align: center;
+      padding: 40px;
+    }
+    .empty-icon { font-size: 56px; margin-bottom: 16px; }
+    .empty-state h5 { color: #999; font-weight: 600; }
+    .empty-state p { font-size: 14px; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-brand">💜 Match Me</span>
+    <div class="d-flex align-items-center gap-3">
+      <span class="topbar-user">{{ user.name }}</span>
+      <a href="/logout" class="btn btn-sm btn-outline-light" style="border-radius:20px; font-size:13px;">Logout</a>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="main-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-profile">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:8px;">Your Interests</div>
+        <div class="d-flex flex-wrap gap-1">
+          {% for i in user.interests %}
+          <span class="interest-tag">{{ i }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="sidebar-matches-header">Matches ({{ matches|length }})</div>
+
+      <div class="sidebar-list">
+        {% for m in matches %}
+        <div class="match-card" id="card-{{ m.id }}" onclick="openChat('{{ m.id }}', '{{ m.name }}')">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="dot {{ 'dot-online' if m.online else 'dot-offline' }}" id="dot-{{ m.id }}"></span>
+            <span class="match-name">{{ m.name }}</span>
+            <span class="match-score ms-auto">{{ m.score }} common</span>
+          </div>
+          <div class="d-flex flex-wrap gap-1">
+            {% for interest in m.common %}
+            <span class="interest-tag">{{ interest }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted" style="font-size:14px;">
+          No matches yet.<br>More users will join soon!
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat-area">
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">💬</div>
+        <h5>Select a match to start chatting</h5>
+        <p>You have {{ matches|length }} match{{ 'es' if matches|length != 1 else '' }} based on shared interests</p>
+      </div>
+
+      <!-- Chat window (hidden until match selected) -->
+      <div id="chatWindow" style="display:none; flex-direction:column; height:100%;">
+        <div class="chat-header">
+          <span class="dot" id="chatDot"></span>
+          <span class="chat-header-name" id="chatName"></span>
+          <span class="chat-header-status" id="chatStatus"></span>
+        </div>
+        <div class="messages-area" id="messagesArea"></div>
+        <div class="message-input-area">
+          <input type="text" id="msgInput" placeholder="Type a message..." autocomplete="off">
+          <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    const ME = '{{ user_id }}';
+    let chatId = null;
+    let chatName = null;
+
+    // --- Socket events ---
+
+    socket.on('status', ({ online }) => {
+      const onlineSet = new Set(online);
+      document.querySelectorAll('[id^="dot-"]').forEach(dot => {
+        const uid = dot.id.slice(4);
+        dot.className = 'dot ' + (onlineSet.has(uid) ? 'dot-online' : 'dot-offline');
+      });
+      if (chatId) updateChatStatus(onlineSet.has(chatId));
+    });
+
+    socket.on('message', msg => {
+      if (msg.from === chatId || msg.from === ME) appendMessage(msg);
+    });
+
+    // --- UI ---
+
+    function openChat(userId, name) {
+      chatId = userId;
+      chatName = name;
+
+      document.querySelectorAll('.match-card').forEach(c => c.classList.remove('active'));
+      const card = document.getElementById('card-' + userId);
+      if (card) card.classList.add('active');
+
+      document.getElementById('emptyState').style.display = 'none';
+      const win = document.getElementById('chatWindow');
+      win.style.display = 'flex';
+
+      document.getElementById('chatName').textContent = name;
+      const dot = document.getElementById('dot-' + userId);
+      const isOnline = dot && dot.classList.contains('dot-online');
+      updateChatStatus(isOnline);
+
+      socket.emit('join', { user_id: userId });
+
+      document.getElementById('messagesArea').innerHTML = '';
+      fetch('/api/messages/' + roomId(ME, userId))
+        .then(r => r.json())
+        .then(msgs => msgs.forEach(appendMessage));
+
+      document.getElementById('msgInput').focus();
+    }
+
+    function updateChatStatus(isOnline) {
+      const dot = document.getElementById('chatDot');
+      const status = document.getElementById('chatStatus');
+      dot.className = 'dot ' + (isOnline ? 'dot-online' : 'dot-offline');
+      status.textContent = isOnline ? 'Online' : 'Offline';
+    }
+
+    function appendMessage(msg) {
+      const area = document.getElementById('messagesArea');
+      const isMine = msg.from === ME;
+
+      const row = document.createElement('div');
+      row.className = 'msg-row ' + (isMine ? 'mine' : 'theirs');
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + (isMine ? 'mine' : 'theirs');
+
+      if (!isMine) {
+        const sender = document.createElement('div');
+        sender.className = 'bubble-sender';
+        sender.textContent = msg.from_name;
+        bubble.appendChild(sender);
+      }
+
+      const text = document.createElement('div');
+      text.textContent = msg.text;
+      bubble.appendChild(text);
+
+      const time = document.createElement('div');
+      time.className = 'bubble-time';
+      time.textContent = msg.timestamp;
+      bubble.appendChild(time);
+
+      row.appendChild(bubble);
+      area.appendChild(row);
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (!text || !chatId) return;
+      socket.emit('message', { to: chatId, text });
+      input.value = '';
+    }
+
+    function roomId(a, b) {
+      return [a, b].sort().join('_');
+    }
+
+    document.getElementById('msgInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
